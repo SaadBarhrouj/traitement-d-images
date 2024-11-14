@@ -36,8 +36,11 @@ def ecrire_matrice_p2(fichier, matrice, max_val):
 # Exemple d'utilisation
 matrice, max_val = lire_matrice_p2('i.bmp')  # Remplacer 'i.bmp' par le nom de votre fichier image
 
-# Effectuer la multiplication de la matrice par 2 (et limiter la valeur maximale à max_val)
-resultat_multiplication = np.minimum(matrice * 2, max_val)  # Limiter à la valeur maximale (par exemple 255)
+# Valeur maximale pour limiter le résultat (par exemple, 15 pour une image 4 bits)
+max_val = 15
+
+# Effectuer la multiplication de la matrice par 2 (et limiter la valeur maximale à 15)
+resultat_multiplication = np.minimum(matrice * 2, max_val)  # Limiter à la valeur maximale (par exemple 15)
 
 # Écrire le résultat dans un nouveau fichier PGM
-ecrire_matrice_p2('resultat_multiplication.bmp', resultat_multiplication, max_val)
+ecrire_matrice_p2('resultat_multiplication.pgm', resultat_multiplication, max_val)
