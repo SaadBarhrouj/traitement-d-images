@@ -1,11 +1,9 @@
-# Importation des bibliothèques nécessaires 
-from matplotlib import pyplot as plt  # Pour générer l'histogramme
-import numpy as np  # Pour manipuler les matrices
-from PIL import Image  # Pour ouvrir et manipuler des images
-from os import path  # Pour vérifier l'existence de l'image
+from PIL import Image
+import numpy as np
+from os import path
 
 # Demander à l'utilisateur de saisir le chemin complet de l'image
-print("Entrez le chemin d'accès complet de l'image (par exemple, /chemin/vers/image.jpg) : ")
+print("Entrez le chemin d'accès complet de l'image (par exemple, /chemin/vers/image.jpg): ")
 nom_image = input()
 
 # Vérifier si le fichier existe
@@ -16,21 +14,41 @@ if not path.exists(nom_image):
 # Ouvrir l'image
 image = Image.open(nom_image)
 
-# Conversion de l'image en niveaux de gris si elle ne l'est pas déjà
-if image.mode != 'L':
-    image = image.convert('L')
+# Vérifier si l'image est en mode RGB (couleur)
+if image.mode != 'RGB':
+    image = image.convert('RGB')
 
-# Récupérer les pixels de l'image sous forme de liste
-pixels = list(image.getdata())
+# Récupérer les dimensions de l'image
+largeur, hauteur = image.size
 
-# Convertir la liste de pixels en un tableau NumPy
-pixels_array = np.array(pixels)
+# Convertir l'image en une matrice NumPy
+pixels = np.array(image)
 
-# Générer l'histogramme avec 255 bins (pour chaque niveau de gris de 0 à 255)
-plt.hist(pixels_array, bins=255, color='gray', edgecolor='black')
+# Déterminer la valeur maximale des pixels en fonction du type d'encodage
+if pixels.dtype == np.uint8:
+    valeur_max = 255  # Codage sur 8 bits
+elif pixels.dtype == np.uint16:
+    valeur_max = 65535  # Codage sur 16 bits
+else:
+    # Autre codage (rare), on prend la valeur maximale trouvée
+    valeur_max = pixels.max()
 
-# Ajouter un titre en français
-plt.title("Histogramme des niveaux de gris")
+# Définir le chemin du fichier texte dans le même répertoire que l'image
+repertoire_image = path.dirname(nom_image)
+fichier_sortie = path.join(repertoire_image, "matrice_image.txt")
 
-# Afficher l'histogramme
-plt.show()
+# Générer un fichier texte contenant le format PNM
+with open(fichier_sortie, "w") as fichier:
+    # Écrire l'en-tête P3
+    fichier.write("P3\n")
+    # Écrire les dimensions et la valeur maximale
+    fichier.write(f"{largeur} {hauteur}\n{valeur_max}\n")
+    # Écrire la matrice sous forme de triplets [R, G, B]
+    for i in range(hauteur):
+        ligne = "".join([f"[{pixels[i][j][0]}, {pixels[i][j][1]}, {pixels[i][j][2]}]" for j in range(largeur)])
+        fichier.write(ligne + "\n")
+
+# Confirmer à l'utilisateur que le fichier a été généré
+print(f"Fichier généré avec succès ({fichier_sortie})")
+print(f"Dimensions : {largeur}x{hauteur}")
+print(f"Valeur maximale des pixels : {valeur_max}")
